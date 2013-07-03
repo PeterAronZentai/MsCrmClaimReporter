@@ -25,6 +25,7 @@
                 var targetOrigin = request.targetOrigin || $data.postMessageODataHandler.postMessageHttpClient.targetOrigin || '*';
 
                 if (targetIframe) {
+                    
                     var listener = function (event) {
                         $data.Trace.log('in listener');
                         window.removeEventListener('message', listener);
@@ -111,10 +112,19 @@
                     document.body.appendChild(iframe);
                 }
             }
-            window.addEventListener("message", onAuthenticated);
+            //window.addEventListener("message", onAuthenticated);
             var url = local ? "authorize.html" : crmUrl + $data.MsCrm.Auth.clientAuthorizationPath;
-            url = url;
-            var w = window.open(url, "_blank", "resizable=false,location=0,menubar=0,toolbar=0,width=400,height=600");
+            //url = url;
+            //onAuthenticated({ data: { Authenticated: true }});
+            var w = window.open(url, "_blank", "resizable=false,location=0,menubar=0,toolbar=0,width=10,height=10");
+            console.log(w.executeScript);
+            w.addEventListener("loadstart", function(e) {
+               console.log("loadStart" + JSON.stringify(e)); 
+            });
+            window.setTimeout(function() {
+                w.close();
+            }, 5000);
+            //alert(window.postMessage);    
         }
 
     }
