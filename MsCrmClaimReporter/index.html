@@ -163,7 +163,6 @@
     });
 
 
-    window.onunload = function() { alert("!"); }
     var app = {
         leads: [],
         selectedLead: undefined,
@@ -174,7 +173,17 @@
 
             //window.onmessage = function() { alert ("!!!!"); }
             window.postMessage({},"*");
-            //return;
+            //var ifr = document.createElement("iframe");
+            //ifr.
+            var img = document.createElement("img");
+            img.onload = function() { alert("img loaded"); }
+            img.onabort = function() { alert("img abort"); }
+            img.onerror = function() { alert("img error"); }
+            img.onloadstart = function() { alert("img loadstart"); }
+            img.src = "https://jaydata.crm.dynamics.com/WebResources/new_check.gif";
+            console.log("image appending");
+            document.body.appendChild(img);
+            console.log("image appended");
             $data.MsCrm.init("https://jaydata.crm.dynamics.com", Crm.DataContext, function (context) {
                 app.dataContext = context,
                 context.LeadSet

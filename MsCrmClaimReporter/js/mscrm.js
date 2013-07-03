@@ -1,18 +1,4 @@
 // JayData 1.3.1
-// Dual licensed under MIT and GPL v2
-// Copyright JayStack Technologies (http://jaydata.org/licensing)
-//
-// JayData is a standards-based, cross-platform Javascript library and a set of
-// practices to access and manipulate data from various online and offline sources.
-//
-// Credits:
-//     Hajnalka Battancs, Dániel József, János Roden, László Horváth, Péter Nochta
-//     Péter Zentai, Róbert Bónay, Szabolcs Czinege, Viktor Borza, Viktor Lázár,
-//     Zoltán Gyebrovszki, Gábor Dolla
-//
-// More info: http://jaydata.org
-/* data js patch to support window messaging */
-/* will be implemented as customHttpClient in next version */
 (function ($data, window, undefined) {
     var odata = window.OData;
 
@@ -80,12 +66,17 @@
 })($data, window);
 
 (function ($data) {
+    
+    function isCordovaApp() {
+        return document.URL.indexOf("file://") === 0;    
+    }
+    
     $data.MsCrm = {
         disableBatch: true
     };
     $data.MsCrm.Auth = {
         trace: true,
-        clientAuthorizationPath: "/WebResources/new_authorize.html",
+        clientAuthorizationPath: "/WebResources/new_authorize2.html",
         messageHandlerPath: "/WebResources/new_postmessage.html",
         login: function do_login(crmUrl, cb, local) {
             var iframe;
@@ -112,18 +103,22 @@
                     document.body.appendChild(iframe);
                 }
             }
-            //window.addEventListener("message", onAuthenticated);
             var url = local ? "authorize.html" : crmUrl + $data.MsCrm.Auth.clientAuthorizationPath;
+            window.addEventListener("message", onAuthenticated);
             //url = url;
             //onAuthenticated({ data: { Authenticated: true }});
+            console.log("opening auth window");
             var w = window.open(url, "_blank", "resizable=false,location=0,menubar=0,toolbar=0,width=10,height=10");
-            console.log(w.executeScript);
-            w.addEventListener("loadstart", function(e) {
-               console.log("loadStart" + JSON.stringify(e)); 
-            });
-            window.setTimeout(function() {
-                w.close();
-            }, 5000);
+            function dumpargs() {
+                console.log(JSON.stringify(arguments));
+            }
+            
+            w.addEventListener("loadstart", dumpargs);
+            w.addEventListener("loadstop", dumpargs);
+            w.addEventListener("exit", dumpargs);
+            w.addEventListener("loaderror", dumpargs);
+            
+            //console.log(w.executeScript);
             //alert(window.postMessage);    
         }
 
