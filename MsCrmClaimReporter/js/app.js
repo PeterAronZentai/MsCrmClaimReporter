@@ -2,46 +2,12 @@
         appTemplate: '#appTemplate'
     });
 
-
-    var Lead = $data.define("Lead", {
-       Id: { type: 'Guid', key: true },
-       FullName: String                
-    });
-
-    var Claim = $data.define("Claim", {
-       Id: { type: 'Guid', key: true },
-       Title: String,
-       LeadId: { type: 'Guid' }
-    });
-
-    var ClaimItem = $data.define("ClaimItem", {
-       Id: { type: 'Guid', key: true },
-       Title: String,
-       Amount: Number
-    });
-
-    var Attachment = $data.define("ClaimItem", {
-       Id: { type: 'Guid', key: true },
-       DocumentBody: String,
-       TextMessage: String
-    });
-
-    var LocalClaimStore = $data.EntityContext.extend("LocalClaimStore", {
-       Leads: { type: $data.EntitySet, elementType: Lead }, 
-       Claim: { type: $data.EntitySet, elementType: Claim },
-       ClaimItems: { type: $data.EntitySet, elementType: Lead },
-       Attachments: { type: $data.EntitySet, elementType: Lead } 
-    });
-
-    
-    //var l
-
     var app = {
         
         /* model data*/
         leads: [],
         selectedLead: undefined,
-        expenseClaim: undefined,
+        expenseClaim: {new_claimitems: []},
         claimItems: [],
         dataContext: null,
         claims: undefined,
@@ -83,19 +49,17 @@
         },
         
         createClaim: function() {
-            var claim = new Crm.new_expenseclaim({
-                new_expenseclaimId : $data.createGuid(),
-                new_claimitems: [{ new_expenseclaimitemId: $data.createGuid() }]
-            });
-            
+            //the UI can operate over simple JS objects or JayData objects
+            //we use simple JS objects here and later in submitClaim do we create entities
+            var claim = {  new_expenseclaimId : $data.createGuid() };
+            claim.new_claimitems = [];
             $.observable(app).setProperty("expenseClaim", claim);
-            app.UI.refreshClaimItemsForm();
+            app.addClaimItem();
         },
 
         addClaimItem: function () {
             var claimItems = app.expenseClaim.new_claimitems;
-            var claimItem = new Crm.new_expenseclaimitem({ new_expenseclaimitemId: $data.createGuid() });
-            $.observable(claimItems).insert(claimItems.length, claimItem);
+            $.observable(claimItems).insert(claimItems.length, {new_expenseclaimitemId: $data.createGuid()});
             app.UI.refreshClaimItemsForm();
         },
 
@@ -105,9 +69,11 @@
         
         submitClaim: function () {
 
-            $.mobile.loading('show', { text: 'Submitting', textVisible: true, theme: "a" });
-            app.dataContext.add(app.expenseClaim);
 
+            $.mobile.loading('show', { text: 'Submitting', textVisible: true, theme: "a" });
+            var expenseClaim = new Crm.new_expenseclaim(app.expenseClaim);
+            debugger;
+            app.dataContext.add(expenseClaim);
             //Dynamics CRM has a bit annoying naming scheme, 
             //nav properties are called the same on both ends
             //here expenseClaim.new_expenseclaims is in fact the Lead entity
@@ -145,15 +111,11 @@
         UI: {
             refreshClaimItemsForm: function() {
                 $('#claimItemsForm').trigger('create');
+                $('#new-claim-form').validate({ submitHandler: app.submitClaim });
             },
             
             selectLead: function() {
                 app.selectLead($.view(this).data); 
-            },
-            
-            showClaimControls: function() { 
-               $('#loginControls').hide();
-               $('#claimControls').show();
             },
             
             showLoading: function(msg) {
@@ -175,6 +137,7 @@ window.addEventListener("offline", function(e) {
       $.observable(app).setProperty("network", "online");
     }, false);
     
+
   $.link.appTemplate('#theBody', app)
         .on('click', '#command-login', app.doLogin)
         .on('click', '#command-add-claim', app.createClaim)
@@ -197,6 +160,10 @@ window.addEventListener("offline", function(e) {
                 }
             }
         })
+        .on('submit','#new-claim-form', function() {
+            console.log("submit event");
+           return false;
+        })
         .on('pageshow', '#leadList', function() {
               app.listLeads();  
         })
@@ -208,3 +175,5 @@ window.addEventListener("offline", function(e) {
         .on('pagebeforeshow', '#createClaimPage', function () {
             $('#createClaimPage').trigger('create');
         });
+
+

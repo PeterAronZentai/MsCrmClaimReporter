@@ -1,13 +1,22 @@
-
 <!DOCTYPE html> 
 <html>
 <head>
 	<title>Page Title</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
-
     
-
+    <style>
+        label.error {
+            color: red;
+            font-size: 16px;
+            font-weight: normal;
+            line-height: 1.4;
+            margin-top: 0.5em;
+            width: 100%;
+            float: none;
+        }
+    </style>
+    
     <script type="text/x-jsrender" id="loginPageTemplate">
         <div data-role="page" id="startupScreen">
             <div data-role="header" data-fullscreen="true" id="header1">
@@ -38,7 +47,6 @@
                 <div id="claimControls">
                     <h2>Manage Expense Claims</h2>
                     <a id="command-add-claim" href="#createClaimPage" data-transition="slide" data-role="button">Create New</a>
-                    <a href="#" id="command-add-meny" data-role="button">Create many</a>
                     <a href="#listClaims" data-role="button">List my claims</a>
                     <a href="https://login.microsoftonline.com/logout.srf">Logout/change user</a>
                     <div>{^{>insertedCounter}}</div>
@@ -56,16 +64,18 @@
 
             <div data-role="content">
                 <h4>Project and Lead details</h4>
-                <form>
+                <form id="new-claim-form" action="#" method="GET">
                 {{include tmpl="#editClaimHead" /}}
         
-                {^{for expenseClaim tmpl="#editClaimItems" /}}
+                {{include tmpl="#editClaimItems" /}}
 
                 <a href="#" data-command="addClaimItem" id="add-claim-item" data-role="button" 
                             data-inline="true" data-icon="plus">Add new expense item</a>
 
-                <a href="#" id="submit-claim" data-role="button" data-inline="true" 
-                            data-icon="check" data-theme="b">Place claim</a>
+                        <input type="submit" value="Press" >
+
+                <input type="submit" data-role="button" data-inline="true" 
+                            data-icon="check" data-theme="b" value="Submit">
                 </form>
             </div>
         </div>
@@ -75,8 +85,8 @@
 
         <div data-role="fieldcontain" id="claim-info">
             {^{for expenseClaim}}
-                <label for="claim-name">Project info:</label>
-                <input name="claim-name" required placeholder="Example: visit lead in Vegas" id="claim-name" data-link="new_name">
+                <label for="new_name">Project info:</label>
+                <input name="new_name" type="text" required placeholder="Example: visit lead in Vegas" id="new_name" data-link="new_name">
             {{/for}}
         </div>
 
@@ -95,18 +105,22 @@
     </script>
 
     <script type="text/x-jsrender" id="editClaimItems">
-        <strong>List your expenses by item</strong>
-        <div id="claimItemsForm">
-            {^{for new_claimitems}}
-                <div class="claimInput" data-role="fieldcontain">
-                    <label for="amount">Amount ($):</label>
-                    <input name="amount" type="number" max="1000000" id="amount" data-link="new_Amount">
-                    <label for="name">Details:</label>
-                    <input name="name" id="name" data-link="new_name" placeholder="Example: taxi, dinner or gift">
-                    <a href="#" class="remove-claim-item" data-role="button" data-inline="true" data-mini="true" data-icon="minus">Remove</a>
-                </div>
-            {{/for}}
-        </div>
+        {^{for expenseClaim}}
+            <strong>List your expenses by item</strong>
+            <div id="claimItemsForm">
+                {^{for new_claimitems}}
+                    <div class="claimInput" data-role="fieldcontain">
+                        
+                        <label for="amount">Amount ($):</label>
+                        <input name="{{attr:#index + 'new_Amount'}}" type="number" max="1000000" id="{{attr:#index + 'new_Amount'}}" data-link="new_Amount" required>
+                        <label for="name">Details:</label>
+                        <input name="{{attr:#index + 'name'}}"  id="{{attr:#index + 'name'}}" data-link="new_name" placeholder="Example: taxi, dinner or gift" required>
+                        <a href="#" class="remove-claim-item" data-role="button" data-inline="true" data-mini="true" data-icon="minus">Remove</a>
+                    </div>
+        
+                {{/for}}
+            </div>
+        {{/for}}
     </script>
     
     <script id="leadListTemplate" type="text/x-jsrender">
@@ -170,6 +184,7 @@
     
 <script src="cordova.js" type="text/javascript"></script>
 <script src="http://include.jaydata.org/1.3.1beta/jquery-1.9.1.z.min.js"></script>
+<script type='text/javascript' src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js"></script>
 <script src="http://include.jaydata.org/1.3.1beta/jquery.mobile.1.3.1.z.min.js"></script>
 <script src="http://include.jaydata.org/1.3.1beta/jquery.observable.z.js"></script>
 <script src="http://include.jaydata.org/1.3.1beta/jsrender.z.js"></script>
