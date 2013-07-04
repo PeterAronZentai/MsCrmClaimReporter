@@ -92,6 +92,7 @@
             }
 
             var onAuthenticated = function (e) {
+                console.log("authenticated rece", e);
                 iframe = document.createElement("iframe");
                 if (e.data.Authenticated) {
                     console.log("Logged in to CRM: " + crmUrl);
@@ -107,17 +108,29 @@
             window.addEventListener("message", onAuthenticated);
             //url = url;
             //onAuthenticated({ data: { Authenticated: true }});
-            console.log("opening auth window");
-            var w = window.open(url, "_blank", "resizable=false,location=0,menubar=0,toolbar=0,width=10,height=10");
+            //console.log("opening auth window");
+            var w = window.open(url, "_blank", "resizable=false,location=0,menubar=0,toolbar=0,width=200,height=300");
+
+            
             function dumpargs() {
                 console.log(JSON.stringify(arguments));
             }
+
             
             w.addEventListener("loadstart", dumpargs);
-            w.addEventListener("loadstop", dumpargs);
+            w.addEventListener("loadstop", function(e) {
+                if (e.url.indexOf("https://jaydata") === 0) {
+                    console.log("load stop #1");
+                    w.close();
+                    window.setTimeout(function() {
+                        console.log("sending self msg");
+                        window.postMessage({Authenticated: true}, '*');
+                    }, 0);
+                }
+            });
             w.addEventListener("exit", dumpargs);
             w.addEventListener("loaderror", dumpargs);
-            
+    
             //console.log(w.executeScript);
             //alert(window.postMessage);    
         }
