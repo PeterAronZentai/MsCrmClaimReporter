@@ -4,7 +4,7 @@
 	<title>Page Title</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
-    
+
     <style>
         label.error {
             color: red;
@@ -63,16 +63,11 @@
 	        </div>
 
             <div data-role="content">
-                <h4>Project and Lead details</h4>
                 <form id="new-claim-form" action="#" method="GET">
+
                 {{include tmpl="#editClaimHead" /}}
         
                 {{include tmpl="#editClaimItems" /}}
-
-                <a href="#" data-command="addClaimItem" id="add-claim-item" data-role="button" 
-                            data-inline="true" data-icon="plus">Add new expense item</a>
-
-                        <input type="submit" value="Press" >
 
                 <input type="submit" data-role="button" data-inline="true" 
                             data-icon="check" data-theme="b" value="Submit">
@@ -85,20 +80,20 @@
 
         <div data-role="fieldcontain" id="claim-info">
             {^{for expenseClaim}}
-                <label for="new_name">Project info:</label>
+                <label for="new_name">Comment:</label>
                 <input name="new_name" type="text" required placeholder="Example: visit lead in Vegas" id="new_name" data-link="new_name">
             {{/for}}
         </div>
 
         <div data-role="fieldcontain">
-            <label for="amount">Lead:</label>
+            <label class="ui-input-text" for=lead_name" >Lead:</label>
             {^{if selectedLead}}
                 {^{for selectedLead}}
                     <strong>{^{>FullName}}</strong>
-                    <a href="#leadList" data-transition="slide">pick different</a>
+                    <a href="#leadList" data-role="button" data-mini="true"  data-inline="true" data-transition="slide">change</a>
                 {{/for}}
             {{else}}
-                <a href="#leadList" data-transition="slide">pick lead from list</a>
+                <a href="#leadList" data-role="button" data-mini="true"  data-inline="true" data-transition="slide">pick lead from list</a>
             {{/if}}
         </div>
         
@@ -109,17 +104,18 @@
             <strong>List your expenses by item</strong>
             <div id="claimItemsForm">
                 {^{for new_claimitems}}
-                    <div class="claimInput" data-role="fieldcontain">
-                        
-                        <label for="amount">Amount ($):</label>
-                        <input name="{{attr:#index + 'new_Amount'}}" type="number" max="1000000" id="{{attr:#index + 'new_Amount'}}" data-link="new_Amount" required>
-                        <label for="name">Details:</label>
-                        <input name="{{attr:#index + 'name'}}"  id="{{attr:#index + 'name'}}" data-link="new_name" placeholder="Example: taxi, dinner or gift" required>
+                    <div data-role="fieldcontain">
+                        <label for="{{attr:#index + '_new_Amount'}}">Amount ($):</label>
+                        <input id="{{attr:#index + '_new_Amount'}}" type="number" max="1000000"  data-link="new_Amount" required placeholder="15">
+                        <label for="{{attr:#index + '_new_name'}}">Details:</label>
+                        <input id="{{attr:#index + '_new_name'}}"  data-link="new_name" placeholder="Example: taxi, dinner or gift" required>
                         <a href="#" class="remove-claim-item" data-role="button" data-inline="true" data-mini="true" data-icon="minus">Remove</a>
                     </div>
         
                 {{/for}}
             </div>
+            <a href="#" data-command="addClaimItem" id="add-claim-item" data-role="button" 
+                        data-inline="true" data-mini="true" data-icon="plus">Add new expense item</a>
         {{/for}}
     </script>
     
@@ -178,7 +174,7 @@
     </script>
 </head>
 
-<body id="theBody">
+<body id="theBody" style="font-family: 'Open Sans'">
     
 </body>
     

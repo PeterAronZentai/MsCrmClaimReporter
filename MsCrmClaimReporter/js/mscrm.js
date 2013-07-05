@@ -74,12 +74,38 @@
     $data.MsCrm = {
         disableBatch: true
     };
+
+
     $data.MsCrm.Auth = {
         trace: true,
         clientAuthorizationPath: "/WebResources/new_authorize2.html",
         messageHandlerPath: "/WebResources/new_postmessage.html",
+        checkImagePath: "/WebResources/new_check.gif",
+        loginStatus: { },
+        check: function( crmUrl, cb) {
+            var img = document.createElement("img");
+            img.style.height = "0px";
+            img.style.width = "0px";
+            var tout = window.setTimeout(function () {
+                cb(false);
+                img.onerror = null;
+                img.onload = null;
+            }, 5000);
+
+            img.onerror = function () {
+                window.clearTimeout(tout);
+                cb(false);
+            };
+            img.onload = function () {
+                window.clearTimeout(tout);
+                cb(true);
+            };
+            img.src = crmUrl + $data.MsCrm.Auth.checkImagePath;
+            document.body.appendChild(img);
+        },
+
         login: function do_login(crmUrl, cb, local) {
-            var iframe;
+            var iframe, w;
 
             var onMessagehandlerLoaded = function (e) {
                 if ($data.MsCrm.Auth.trace) console.log("Message received", crmUrl);
@@ -93,6 +119,8 @@
 
             var onAuthenticated = function (e) {
                 console.log("authenticated rece", e);
+                try { w.close(); } catch (e) { };
+
                 iframe = document.createElement("iframe");
                 if (e.data.Authenticated) {
                     console.log("Logged in to CRM: " + crmUrl);
@@ -104,35 +132,26 @@
                     document.body.appendChild(iframe);
                 }
             }
+
             var url = local ? "authorize.html" : crmUrl + $data.MsCrm.Auth.clientAuthorizationPath;
-            window.addEventListener("message", onAuthenticated);
-            //url = url;
-            //onAuthenticated({ data: { Authenticated: true }});
-            //console.log("opening auth window");
-            var w = window.open(url, "_blank", "resizable=false,location=0,menubar=0,toolbar=0,width=200,height=300");
 
-            
-            function dumpargs() {
-                console.log(JSON.stringify(arguments));
-            }
-
-            
-            w.addEventListener("loadstart", dumpargs);
-            w.addEventListener("loadstop", function(e) {
-                if (e.url.indexOf("https://jaydata") === 0) {
-                    console.log("load stop #1");
-                    w.close();
-                    window.setTimeout(function() {
-                        console.log("sending self msg");
-                        window.postMessage({Authenticated: true}, '*');
-                    }, 0);
+                if (!result) {
+                    alert(result);
+                    window.addEventListener("message", onAuthenticated);
+                    w = window.open(url, "_blank", "resizable=false,location=0,menubar=0,toolbar=0,width=200,height=300");
+                    w.addEventListener("loadstop", function (e) {
+                        if (e.url.indexOf("https://jaydata") === 0) {
+                            console.log("load stop #1");
+                            window.setTimeout(function () {
+                                console.log("sending self msg");
+                                window.postMessage({ Authenticated: true }, '*');
+                            }, 0);
+                        }
+                    });
+                } else {
+                    onAuthenticated({ data: { Authenticated: true } });
                 }
-            });
-            w.addEventListener("exit", dumpargs);
-            w.addEventListener("loaderror", dumpargs);
-    
-            //console.log(w.executeScript);
-            //alert(window.postMessage);    
+
         }
 
     }

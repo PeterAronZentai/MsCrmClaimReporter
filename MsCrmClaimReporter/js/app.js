@@ -2,6 +2,7 @@
         appTemplate: '#appTemplate'
     });
 
+
     var app = {
         
         /* model data*/
@@ -12,12 +13,17 @@
         dataContext: null,
         claims: undefined,
         selectedClaim: undefined,
+
         network: 'online',
-        insertedCounter: 0,
+        serviceUrl: 'https://jaydata.crm.dynamics.com',
+    
         doLogin: function () {
             console.log(this);
             app.UI.showLoading('Logging in...');
             
+            //$data.MsCrm.Auth.check("https://jaydata.crm.dynamics.com", function (r) {
+            //    alert(r);
+            //});
             $data.MsCrm.init("https://jaydata.crm.dynamics.com", Crm.DataContext, function (context) {
                
                app.dataContext = context;
@@ -129,14 +135,10 @@
     
     }
 
-window.addEventListener("offline", function(e) {
-      $.observable(app).setProperty("network", "offline");
-    }, false);
-    
-    window.addEventListener("online", function(e) {
-      $.observable(app).setProperty("network", "online");
-    }, false);
-    
+
+    $data.MsCrm.Auth.check(app.serviceUrl, function (r) {
+        $.observable(app).setProperty("authenticated", r);
+    });
 
   $.link.appTemplate('#theBody', app)
         .on('click', '#command-login', app.doLogin)
